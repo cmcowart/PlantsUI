@@ -10,6 +10,7 @@ import { ModalStyle } from "../constants/Styles";
 export default function AddPlantButton({
   handleAddPlant,
   plantTypes,
+  plantActionTypes,
   plantLocations,
 }) {
   const [open, setOpen] = React.useState(false);
@@ -36,6 +37,7 @@ export default function AddPlantButton({
           <PlantForm
             closeAction={handleFormSubmit}
             plantTypes={plantTypes}
+            plantActionTypes={plantActionTypes}
             plantLocations={plantLocations}
           />
         </Box>

@@ -1,6 +1,5 @@
-
-import './App.css';
-import PlantAppContainer from './components/PlantAppContainer';
+import "./App.css";
+import PlantAppContainer from "./components/PlantAppContainer";
 
 function App() {
   return (

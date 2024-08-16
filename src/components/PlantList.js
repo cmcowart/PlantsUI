@@ -13,10 +13,13 @@ import Modal from "@mui/material/Modal";
 import AddPlantButton from "./AddPlantButton";
 import { ModalStyle } from "../constants/Styles";
 import PlantDetails from "./PlantDetails";
+import { getDateDiff } from "../utils/DateUtils";
 
 export default function PlantList({
-  handAddPlant,
+  handleAddPlant,
+  handleAddPlantAction,
   plants,
+  plantActionTypes,
   plantTypes,
   plantLocations,
 }) {
@@ -48,8 +51,9 @@ export default function PlantList({
   return (
     <Stack>
       <AddPlantButton
-        handleAddPlant={handAddPlant}
+        handleAddPlant={handleAddPlant}
         plantTypes={plantTypes}
+        plantActionTypes={plantActionTypes}
         plantLocations={plantLocations}
       />
       <TableContainer component={Paper}>
@@ -79,8 +83,25 @@ export default function PlantList({
                 <TableCell align="center">
                   {getPlantLocationForId(plant.plantLocationId).description}
                 </TableCell>
-                <TableCell align="center"> </TableCell>
-                <TableCell align="center"> </TableCell>
+                <TableCell align="center">
+                  {plant.lastWateredAt
+                    ? new Date(plant.lastWateredAt).toLocaleString()
+                    : ""}
+                  <br />
+                  {getDateDiff(new Date(plant.lastWateredAt), new Date())}{" "}
+                  Day(s) Ago
+                </TableCell>
+                <TableCell align="center">
+                  {plant.lastFertilizedAt
+                    ? new Date(plant.lastFertilizedAt).toLocaleString()
+                    : ""}
+                  <br />
+                  {getDateDiff(
+                    new Date(plant.lastFertilizedAt),
+                    new Date(),
+                  )}{" "}
+                  Day(s) Ago
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -94,9 +115,11 @@ export default function PlantList({
       >
         <Box sx={ModalStyle}>
           <PlantDetails
+            handleAddPlantAction={handleAddPlantAction}
             plant={selectedRow}
             plantType={selectedPlantType}
             plantLocation={selectedPlantLocation}
+            closeDetailsModal={handleClose}
           />
         </Box>
       </Modal>

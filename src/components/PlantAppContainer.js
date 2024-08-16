@@ -4,12 +4,23 @@ import Stack from "@mui/material/Stack";
 import PlantList from "./PlantList";
 import PlantTypeList from "./PlantTypeList";
 
+import {
+  createPlant,
+  createPlantAction,
+  createPlantType,
+  getPlantActionTypes,
+  getPlantLocations,
+  getPlantReport,
+  getPlantTypes,
+} from "../api/Rest";
+
 export default class PlantAppContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       error: null,
       plants: [],
+      plantActionTypes: [],
       plantTypes: [],
       plantLocations: [],
     };
@@ -17,11 +28,28 @@ export default class PlantAppContainer extends React.Component {
     this.handlePlantTypeFormSubmission =
       this.handlePlantTypeFormSubmission.bind(this);
     this.handlePlantFormSubmission = this.handlePlantFormSubmission.bind(this);
+    this.handleAddPlantAction = this.handleAddPlantAction.bind(this);
+  }
+
+  loadPlantActionTypes() {
+    getPlantActionTypes()
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            plantActionTypes: result,
+          });
+        },
+        (error) => {
+          this.setState({
+            error,
+          });
+        },
+      );
   }
 
   loadPlants() {
-    const PLANT_URL = "http://localhost:8080/plants";
-    fetch(PLANT_URL)
+    getPlantReport()
       .then((res) => res.json())
       .then(
         (result) => {
@@ -38,8 +66,7 @@ export default class PlantAppContainer extends React.Component {
   }
 
   loadPlantTypes() {
-    const PLANT_URL = "http://localhost:8080/plant-types";
-    fetch(PLANT_URL)
+    getPlantTypes()
       .then((res) => res.json())
       .then(
         (result) => {
@@ -56,8 +83,7 @@ export default class PlantAppContainer extends React.Component {
   }
 
   loadPlantLocations() {
-    const PLANT_URL = "http://localhost:8080/plant-locations";
-    fetch(PLANT_URL)
+    getPlantLocations()
       .then((res) => res.json())
       .then(
         (result) => {
@@ -78,16 +104,8 @@ export default class PlantAppContainer extends React.Component {
       plants: [],
     });
 
-    const PLANT_URL = "http://localhost:8080/plants/create";
-    fetch(PLANT_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newPlant),
-    }).then(
-      (result) => this.loadPlants(),
+    createPlant(newPlant).then(
+      () => this.loadPlants(),
       (error) => {
         this.setState({
           error,
@@ -101,12 +119,23 @@ export default class PlantAppContainer extends React.Component {
       plantTypes: [],
     });
 
-    const PLANT_URL = "ttp://localhost:8080/plant-types/create";
-    fetch(PLANT_URL, {
-      method: "POST",
-      body: plantName,
-    }).then(
-      (result) => this.loadPlantTypes(),
+    createPlantType(plantName).then(
+      () => this.loadPlantTypes(),
+      (error) => {
+        this.setState({
+          error,
+        });
+      },
+    );
+  }
+
+  addPlantAction(plantAction) {
+    this.setState({
+      plants: [],
+    });
+
+    createPlantAction(plantAction).then(
+      () => this.loadPlants(),
       (error) => {
         this.setState({
           error,
@@ -118,6 +147,7 @@ export default class PlantAppContainer extends React.Component {
   componentDidMount() {
     this.loadPlants();
     this.loadPlantTypes();
+    this.loadPlantActionTypes();
     this.loadPlantLocations();
   }
 
@@ -129,13 +159,19 @@ export default class PlantAppContainer extends React.Component {
     this.addNewPlant(newPlant);
   }
 
+  handleAddPlantAction(plantAction) {
+    this.addPlantAction(plantAction);
+  }
+
   render() {
-    const { error, plants, plantTypes, plantLocations } = this.state;
+    const { error, plants, plantActionTypes, plantTypes, plantLocations } =
+      this.state;
     if (error) {
       return <div>Error: {error.message}</div>;
     } else if (
       plantLocations.length === 0 ||
       plantTypes.length === 0 ||
+      plantActionTypes === 0 ||
       plants.length === 0
     ) {
       return <div>Loading...</div>;
@@ -148,9 +184,11 @@ export default class PlantAppContainer extends React.Component {
           />
           <PlantList
             plants={plants}
+            plantActionTypes={plantActionTypes}
             plantTypes={plantTypes}
             plantLocations={plantLocations}
-            handAddPlant={this.handlePlantFormSubmission}
+            handleAddPlant={this.handlePlantFormSubmission}
+            handleAddPlantAction={this.handleAddPlantAction}
           />
         </Stack>
       );
